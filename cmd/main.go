@@ -6,7 +6,6 @@ import (
 	//tntRepo "bot/repo/tarantool"
 	//tt "github.com/tarantool/go-tarantool"
 
-	//tntRepo "bot/repo/tarantool"
 	svc "bot/usecases/service"
 	"encoding/json"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/rs/zerolog"
-	//tt "github.com/tarantool/go-tarantool"
 	"log"
 	"net/url"
 	"os"
@@ -24,7 +22,6 @@ import (
 	"time"
 )
 
-//github.com/mattermost/mattermost-server/v6/model
 
 // Config хранит параметры подключения к Mattermost.
 type Config struct {
@@ -35,7 +32,6 @@ type Config struct {
 	MattermostServer   *url.URL
 }
 
-// loadConfig загружает конфигурацию из переменных окружения.
 func loadConfig() Config {
 	if err := godotenv.Load("ENV.env"); err != nil {
 		log.Printf("Не удалось загрузить .env-файл: %v", err)
@@ -49,7 +45,7 @@ func loadConfig() Config {
 
 	return Config{
 		MattermostUserName: os.Getenv("MM_USERNAME"), //"PollBot",                    //os.Getenv("MM_USERNAME"),
-		MattermostTeamName: os.Getenv("MM_TEAM"),     //"mmm",                        //os.Getenv("MM_TEAM"),
+		MattermostTeamName: os.Getenv("MM_TEAM"),                            //os.Getenv("MM_TEAM"),
 		MattermostToken:    os.Getenv("MM_TOKEN"),    //"37345hchoigwjnahw4m9pmfgbo", //os.Getenv("MM_TOKEN"),
 		MattermostChannel:  os.Getenv("MM_CHANNEL"),  //"town-square",                // os.Getenv("MM_CHANNEL"),
 		MattermostServer:   serverURL,
@@ -69,7 +65,6 @@ type Application struct {
 	service *svc.Service
 }
 
-// service *service.Service
 func NewApplication(service *svc.Service, config Config, logger zerolog.Logger) *Application {
 	/*logger := zerolog.New(zerolog.ConsoleWriter{
 		Out:        os.Stdout,
@@ -85,12 +80,11 @@ func NewApplication(service *svc.Service, config Config, logger zerolog.Logger) 
 	}
 }
 
-// sendMsgToChannel отправляет сообщение в указанный канал Mattermost.
 func (app *Application) sendMsgToChannel(message, replyToID string) {
 	post := &model.Post{
 		ChannelId: app.mattermostChannel.Id,
 		Message:   message,
-		RootId:    replyToID, // если ответ в треде
+		RootId:    replyToID, 
 	}
 	if _, _, err := app.mattermostClient.CreatePost(post); err != nil {
 		app.logger.Error().Err(err).Str("replyToID", replyToID).Msg("Не удалось отправить сообщение")
@@ -111,7 +105,7 @@ func parseCommand(input string) []string {
 	return args
 }
 
-// validateCommand принимает разобранные аргументы и возвращает номер команды:
+
 // 1 - /createPoll, 2 - /vote, 3 - /result, 4 - /endPoll, 5 - /delete.
 // Если синтаксис не соответствует ни одной команде или аргументы заданы неверно, функция возвращает 0.
 func validateCommand(args []string) int {
@@ -216,8 +210,6 @@ func (app *Application) handleWebSocketEvent(event *model.WebSocketEvent) {
 		// dataToProcess[1] : PollName (описание опроса)
 		// dataToProcess[2] : количество опций (n) в виде строки
 		// dataToProcess[3] ... dataToProcess[3+n-1] : текст каждой опции
-
-		// Преобразуем количество опций в число
 		numOptions, err := strconv.Atoi(dataToProcess[2])
 		if err != nil || numOptions < 1 || len(dataToProcess) != 3+numOptions {
 			app.sendMsgToChannel("Invalid input for /createPoll command", post.Id)
@@ -266,10 +258,6 @@ func (app *Application) handleWebSocketEvent(event *model.WebSocketEvent) {
 			break
 		}
 
-		// Если необходимо ограничить голосование одним голосом на пользователя,
-		// здесь можно проверить, не голосовал ли уже этот пользователь.
-		// Например, можно хранить список userID, отдавших голос в опросе.
-
 		var selectedOptionID string
 		for _, opt := range poll.Options {
 			if opt.Text == optionText {
@@ -288,7 +276,7 @@ func (app *Application) handleWebSocketEvent(event *model.WebSocketEvent) {
 			app.sendMsgToChannel("Error voting: "+err.Error(), post.Id)
 		} else {
 			app.sendMsgToChannel("Vote registered successfully!", post.Id)
-			// Опционально, можно сразу вернуть обновленные результаты опроса
+
 		}
 	case 3:
 		// Ожидаемый формат: /result <Poll id>
@@ -358,13 +346,10 @@ func (app *Application) handleWebSocketEvent(event *model.WebSocketEvent) {
 	// app.sendMsgToChannel(receivedData, post.Id)
 }
 
-// listenToEvents запускает цикл получения событий по WebSocket.
-
-// ! ошибка сокет не подключается
 func (app *Application) listenToEvents() {
 	var err error
 	for {
-		// Формируем URL для WebSocket (используем wss:// для TLS)
+	
 		wsURL := fmt.Sprintf("ws://%s%s", app.config.MattermostServer.Host, app.config.MattermostServer.Path)
 		app.mattermostWebSocketClient, err = model.NewWebSocketClient4(wsURL, app.mattermostClient.AuthToken)
 		if err != nil {
@@ -383,7 +368,7 @@ func (app *Application) listenToEvents() {
 	}
 }
 
-// setupGracefulShutdown обеспечивает корректное завершение работы бота.
+
 func setupGracefulShutdown(app *Application) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -411,6 +396,7 @@ func main() {
 			log.Fatalf("Failed to connect to Tarantool: %s", err)
 		}
 	*/
+	//sv := svc.NewService(ttStorage)
 
 	logger := zerolog.New(zerolog.ConsoleWriter{
 		Out:        os.Stdout,
@@ -422,7 +408,7 @@ func main() {
 
 	rs := ram.NewRamStorage()
 	sv := svc.NewService(rs)
-	//sv := svc.NewService(ttStorage)
+	
 	app := NewApplication(sv, config, logger)
 
 	setupGracefulShutdown(app)
