@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  tarantool:
+    image: tarantool/tarantool:2.10
+    ports:
+      - "3301:3301"
+    environment:
+      TARANTOOL_USER_NAME: admin        # имя пользователя для подключений (по умолчанию guest)
+      TARANTOOL_USER_PASSWORD: examplepass  # пароль для пользователя
